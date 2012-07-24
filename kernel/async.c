@@ -90,13 +90,17 @@ static async_cookie_t  __lowest_in_progress(struct async_domain *running)
 	async_cookie_t first_pending = next_cookie;	/* ditto */
 	struct async_entry *entry;
 
-	/*
-	 * Both running and pending lists are sorted but not disjoint.
-	 * Take the first cookies from both and return the min.
-	 */
-	if (!list_empty(&running->domain)) {
-		entry = list_first_entry(&running->domain, typeof(*entry), list);
-		first_running = entry->cookie;
+	if (!running) { /* just check the entry count */
+		if (atomic_read(&entry_count))
+			return 0; /* smaller than any cookie */
+		else
+			return next_cookie;
+	}
+
+	if (!list_empty(running)) {
+		entry = list_first_entry(running,
+			struct async_entry, list);
+		return entry->cookie;
 	}
 
 	list_for_each_entry(entry, &async_pending, list) {
@@ -255,18 +259,7 @@ EXPORT_SYMBOL_GPL(async_schedule_domain);
  */
 void async_synchronize_full(void)
 {
-	mutex_lock(&async_register_mutex);
-	do {
-		struct async_domain *domain = NULL;
-
-		spin_lock_irq(&async_lock);
-		if (!list_empty(&async_domains))
-			domain = list_first_entry(&async_domains, typeof(*domain), node);
-		spin_unlock_irq(&async_lock);
-
-		async_synchronize_cookie_domain(next_cookie, domain);
-	} while (!list_empty(&async_domains));
-	mutex_unlock(&async_register_mutex);
+	async_synchronize_cookie_domain(next_cookie, NULL);
 }
 EXPORT_SYMBOL_GPL(async_synchronize_full);
 
