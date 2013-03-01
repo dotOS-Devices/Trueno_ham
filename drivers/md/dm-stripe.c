@@ -448,3 +448,4 @@ void dm_stripe_exit(void)
 {
 	dm_unregister_target(&stripe_target);
 }
+
