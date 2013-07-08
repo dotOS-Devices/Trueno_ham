@@ -46,8 +46,8 @@ static const struct compress_format {
 	{ {0x5d, 0x00}, "lzma", unlzma },
 	{ {0xfd, 0x37}, "xz", unxz },
 	{ {0x89, 0x4c}, "lzo", unlzo },
-	{ {0, 0}, NULL, NULL },
 	{ {0x02, 0x21}, "lz4", unlz4 },
+	{ {0, 0}, NULL, NULL }
 };
 
 decompress_fn decompress_method(const unsigned char *inbuf, int len,
