@@ -1510,6 +1510,7 @@ struct xhci_hcd {
 #define XHCI_PORTSC_DELAY	(1 << 10)
 #define XHCI_RESET_DELAY	(1 << 11)
 #define XHCI_AVOID_BEI		(1 << 15)
+#define XHCI_PLAT		(1 << 16)
 	unsigned int		num_active_eps;
 	unsigned int		limit_active_eps;
 	/* There are two roothubs to keep track of bus suspend info for */
