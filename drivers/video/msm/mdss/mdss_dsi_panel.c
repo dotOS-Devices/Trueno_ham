@@ -497,7 +497,7 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 		gpio_set_value(ctrl->bl_outdoor_gpio, 0);
 #endif
 
-	pr_debug("%s: ctrl=%pK ndx=%d\n", __func__, ctrl, ctrl->ndx);
+	pr_debug("%s: ctrl=%p ndx=%d\n", __func__, ctrl, ctrl->ndx);
 
 	mipi  = &pdata->panel_info.mipi;
 

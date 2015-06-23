@@ -248,9 +248,7 @@ typedef struct fpc1020_setup {
 	u8 input_mode;
 #endif
     u8 enable_navi;
-    u8 hw_reset;    
     u8 irq;
-    u8 key;
     u8 wakeup;
     u16 gain_shift;
     u16 pixel_ctrl;
@@ -309,7 +307,7 @@ typedef struct {
 	bool                   power_enabled;
 	int                    vddtx_mv;
 	bool                   txout_boost;
-    struct wake_lock       wake_lock;
+	struct wake_lock       wake_lock;
 
 #ifdef CONFIG_INPUT_FPC1020_NAV
 	struct input_dev	*input_dev;
@@ -322,7 +320,7 @@ typedef struct {
     struct work_struct input_report_work;
     struct workqueue_struct *fpc1020_wq;
     int report_key;
-	u8 wakeup;
+    u8 wakeup_status;
 	bool down;
 #endif
 

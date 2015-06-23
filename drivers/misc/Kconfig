@@ -677,6 +677,12 @@ config UID_CPUTIME
 	help
 	  Per UID based cpu time statistics exported to /proc/uid_cputime
 
+config NXP_TFA9890
+	depends on I2C
+	tristate "NXP TFA9890 Support"
+	---help---
+	  The NXP TFA9890 chip is used as a  smart PA Controller.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
