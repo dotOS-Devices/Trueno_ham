@@ -76,7 +76,8 @@ int msm_audio_effects_virtualizer_handler(struct audio_client *ac,
 				goto invalid_config;
 			}
 			prev_enable_flag = virtualizer->enable_flag;
-			virtualizer->enable_flag = *values++;
+			virtualizer->enable_flag =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s:VIRT ENABLE prev:%d, new:%d\n", __func__,
 				prev_enable_flag, virtualizer->enable_flag);
 			if (prev_enable_flag != virtualizer->enable_flag) {
@@ -103,7 +104,8 @@ int msm_audio_effects_virtualizer_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			virtualizer->strength = *values++;
+			virtualizer->strength =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: VIRT STRENGTH val: %d\n",
 					__func__, virtualizer->strength);
 			if (command_config_state == CONFIG_SET) {
@@ -130,7 +132,8 @@ int msm_audio_effects_virtualizer_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			virtualizer->out_type = *values++;
+			virtualizer->out_type =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: VIRT OUT_TYPE val:%d\n",
 				__func__, virtualizer->out_type);
 			if (command_config_state == CONFIG_SET) {
@@ -157,7 +160,8 @@ int msm_audio_effects_virtualizer_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			virtualizer->gain_adjust = *values++;
+			virtualizer->gain_adjust =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: VIRT GAIN_ADJUST val:%d\n",
 				__func__, virtualizer->gain_adjust);
 			if (command_config_state == CONFIG_SET) {
@@ -235,7 +239,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				goto invalid_config;
 			}
 			prev_enable_flag = reverb->enable_flag;
-			reverb->enable_flag = *values++;
+			reverb->enable_flag =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s:REVERB_ENABLE prev:%d,new:%d\n", __func__,
 					prev_enable_flag, reverb->enable_flag);
 			if (prev_enable_flag != reverb->enable_flag) {
@@ -262,7 +267,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->mode = *values++;
+			reverb->mode =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_MODE val:%d\n",
 				__func__, reverb->mode);
 			if (command_config_state == CONFIG_SET) {
@@ -289,7 +295,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->preset = *values++;
+			reverb->preset =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_PRESET val:%d\n",
 					__func__, reverb->preset);
 			if (command_config_state == CONFIG_SET) {
@@ -316,7 +323,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->wet_mix = *values++;
+			reverb->wet_mix =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_WET_MIX val:%d\n",
 				__func__, reverb->wet_mix);
 			if (command_config_state == CONFIG_SET) {
@@ -343,7 +351,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->gain_adjust = *values++;
+			reverb->gain_adjust =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_GAIN_ADJUST val:%d\n",
 					__func__, reverb->gain_adjust);
 			if (command_config_state == CONFIG_SET) {
@@ -370,7 +379,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->room_level = *values++;
+			reverb->room_level =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_ROOM_LEVEL val:%d\n",
 				__func__, reverb->room_level);
 			if (command_config_state == CONFIG_SET) {
@@ -397,7 +407,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->room_hf_level = *values++;
+			reverb->room_hf_level =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_ROOM_HF_LEVEL val%d\n",
 				__func__, reverb->room_hf_level);
 			if (command_config_state == CONFIG_SET) {
@@ -424,7 +435,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->decay_time = *values++;
+			reverb->decay_time =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_DECAY_TIME val:%d\n",
 				__func__, reverb->decay_time);
 			if (command_config_state == CONFIG_SET) {
@@ -451,7 +463,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->decay_hf_ratio = *values++;
+			reverb->decay_hf_ratio =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_DECAY_HF_RATIO val%d\n",
 				__func__, reverb->decay_hf_ratio);
 			if (command_config_state == CONFIG_SET) {
@@ -478,7 +491,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->reflections_level = *values++;
+			reverb->reflections_level =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_REFLECTIONS_LEVEL val:%d\n",
 				__func__, reverb->reflections_level);
 			if (command_config_state == CONFIG_SET) {
@@ -505,7 +519,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->reflections_delay = *values++;
+			reverb->reflections_delay =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_REFLECTIONS_DELAY val:%d\n",
 				__func__, reverb->reflections_delay);
 			if (command_config_state == CONFIG_SET) {
@@ -532,7 +547,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->level = *values++;
+			reverb->level =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_LEVEL val:%d\n",
 				__func__, reverb->level);
 			if (command_config_state == CONFIG_SET) {
@@ -559,7 +575,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->delay = *values++;
+			reverb->delay =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s:REVERB_DELAY val:%d\n",
 					__func__, reverb->delay);
 			if (command_config_state == CONFIG_SET) {
@@ -586,7 +603,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->diffusion = *values++;
+			reverb->diffusion =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_DIFFUSION val:%d\n",
 				__func__, reverb->diffusion);
 			if (command_config_state == CONFIG_SET) {
@@ -613,7 +631,8 @@ int msm_audio_effects_reverb_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			reverb->density = *values++;
+			reverb->density =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: REVERB_DENSITY val:%d\n",
 				__func__, reverb->density);
 			if (command_config_state == CONFIG_SET) {
@@ -691,7 +710,8 @@ int msm_audio_effects_bass_boost_handler(struct audio_client *ac,
 				goto invalid_config;
 			}
 			prev_enable_flag = bass_boost->enable_flag;
-			bass_boost->enable_flag = *values++;
+			bass_boost->enable_flag =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: BASS_BOOST_ENABLE prev:%d new:%d\n",
 				__func__, prev_enable_flag,
 				bass_boost->enable_flag);
@@ -719,7 +739,8 @@ int msm_audio_effects_bass_boost_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			bass_boost->mode = *values++;
+			bass_boost->mode =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: BASS_BOOST_MODE val:%d\n",
 				__func__, bass_boost->mode);
 			if (command_config_state == CONFIG_SET) {
@@ -746,8 +767,9 @@ int msm_audio_effects_bass_boost_handler(struct audio_client *ac,
 				rc = -EINVAL;
 				goto invalid_config;
 			}
-			bass_boost->strength = *values++;
-			pr_debug("%s: BASS_BOOST_STRENGTHi val:%d\n",
+			bass_boost->strength =
+				GET_NEXT(values, param_max_offset, rc);
+			pr_debug("%s: BASS_BOOST_STRENGTH val:%d\n",
 				__func__, bass_boost->strength);
 			if (command_config_state == CONFIG_SET) {
 				params_length += COMMAND_PAYLOAD_SZ +
@@ -826,7 +848,8 @@ int msm_audio_effects_popless_eq_handler(struct audio_client *ac,
 				goto invalid_config;
 			}
 			prev_enable_flag = eq->enable_flag;
-			eq->enable_flag = *values++;
+			eq->enable_flag =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: EQ_ENABLE prev:%d new:%d\n", __func__,
 				prev_enable_flag, eq->enable_flag);
 			if (prev_enable_flag != eq->enable_flag) {
@@ -976,7 +999,8 @@ int msm_audio_effects_popless_eq_handler(struct audio_client *ac,
 				pr_err("EQ_SINGLE_BAND_FREQ:invalid index\n");
 				break;
 			}
-			eq->freq_millihertz = *values++;
+			eq->freq_millihertz =
+				GET_NEXT(values, param_max_offset, rc);
 			pr_debug("%s: EQ_SINGLE_BAND_FREQ idx:%d, val:%d\n",
 				__func__, eq->band_index, eq->freq_millihertz);
 			if (command_config_state == CONFIG_SET) {
