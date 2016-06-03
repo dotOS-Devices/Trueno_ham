@@ -2501,6 +2501,7 @@ static int venus_hfi_session_clean(void *session)
 		return -EINVAL;
 	}
 	sess_close = session;
+	device = sess_close->device;
 	dprintk(VIDC_DBG, "deleted the session: 0x%pK",
 			sess_close);
 	mutex_lock(&((struct venus_hfi_device *)
