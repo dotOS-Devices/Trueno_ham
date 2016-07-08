@@ -203,13 +203,13 @@ static noinline void key_gc_unused_keys(struct list_head *keys)
 			spin_unlock(&key->user->lock);
 		}
 
-		atomic_dec(&key->user->nkeys);
-		if (test_bit(KEY_FLAG_INSTANTIATED, &key->flags))
-			atomic_dec(&key->user->nikeys);
+	/* now throw away the key memory */
+	if (key->type->destroy)
+		key->type->destroy(key);
 
-		key_user_put(key->user);
+	key_user_put(key->user);
 
-		kfree(key->description);
+	kfree(key->description);
 
 #ifdef KEY_DEBUGGING
 		key->magic = KEY_DEBUG_MAGIC_X;
