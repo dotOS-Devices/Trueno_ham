@@ -1351,9 +1351,9 @@ long audio_aio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		struct msm_audio_ion_info info;
 		pr_debug("%s[%pK]:AUDIO_REGISTER_ION\n", __func__, audio);
 		mutex_lock(&audio->lock);
-		if (copy_from_user(&info, (void *)arg, sizeof(info))) {
+		if (copy_from_user(&info, (void *)arg, sizeof(info)))
 			rc = -EFAULT;
-		} else {
+		else {
 			mutex_lock(&audio->read_lock);
 			mutex_lock(&audio->write_lock);
 			rc = audio_aio_ion_add(audio, &info);
@@ -1369,7 +1369,7 @@ long audio_aio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		pr_debug("%s[%pK]:AUDIO_DEREGISTER_ION\n", __func__, audio);
 		if (copy_from_user(&info, (void *)arg, sizeof(info)))
 			rc = -EFAULT;
-		} else {
+		else {
 			mutex_lock(&audio->read_lock);
 			mutex_lock(&audio->write_lock);
 			rc = audio_aio_ion_remove(audio, &info);
