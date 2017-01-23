@@ -1,7 +1,7 @@
 /* drivers/input/touchscreen/goodix_tool.c
  *
  * 2010 - 2012 Goodix Technology.
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
