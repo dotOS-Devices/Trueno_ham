@@ -14,6 +14,7 @@ obj-$(CONFIG_CPU_FREQ_GOV_ZZMOOVE)     	   += cpufreq_zzmoove.o
 obj-$(CONFIG_CPU_FREQ_GOV_INTELLIACTIVE)   += cpufreq_intelliactive.o
 obj-$(CONFIG_CPU_FREQ_GOV_NIGHTMARE)	   += cpufreq_nightmare.o
 obj-$(CONFIG_CPU_FREQ_GOV_ALUCARD)	   += cpufreq_alucard.o
+obj-$(CONFIG_CPU_FREQ_GOV_OPTIMAX)	   += cpufreq_optimax.o
 
 # CPUfreq cross-arch helpers
 obj-$(CONFIG_CPU_FREQ_TABLE)		+= freq_table.o
