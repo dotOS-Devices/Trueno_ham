@@ -33,7 +33,8 @@
 #endif
 
 #define HTC_PROCEDURE_SET_VIB_ON_OFF	21
-#define PMIC_VIBRATOR_LEVEL	(3000)
+#define PMIC_VIBRATOR_LEVEL_MAX  3200
+#define PMIC_VIBRATOR_LEVEL_MIN  1100
 
 static struct work_struct work_vibrator_on;
 static struct work_struct work_vibrator_off;
@@ -59,8 +60,13 @@ static void set_pmic_vibrator(int on)
 		pr_err("%s: Vibrator set voltage level failed", __func__);
 }
 #else
+
+/* default value for vibration intensity, 95% = 3000 in PMIC_VIBRATOR_LEVEL */
+static unsigned long pwmval = 95;
+
 static void set_pmic_vibrator(int on)
 {
+        int pwm_duty;
 	static struct msm_rpc_endpoint *vib_endpoint;
 	struct set_vib_on_off_req {
 		struct rpc_request_hdr hdr;
@@ -76,9 +82,19 @@ static void set_pmic_vibrator(int on)
 		}
 	}
 
+	/* make sure pwmval is between 0 and 100 */
+	if (pwmval > 100) {
+		pwmval = 100;
+	} else if (pwmval < 0) {
+		pwmval = 0;
+	}
+
+	/* calculate vibration level */
+	pwm_duty = (PMIC_VIBRATOR_LEVEL_MIN +
+	(pwmval * (PMIC_VIBRATOR_LEVEL_MAX - PMIC_VIBRATOR_LEVEL_MIN) / 100));
 
 	if (on)
-		req.data = cpu_to_be32(PMIC_VIBRATOR_LEVEL);
+		req.data = cpu_to_be32(pwm_duty);
 	else
 		req.data = cpu_to_be32(0);
 
@@ -140,6 +156,50 @@ static enum hrtimer_restart vibrator_timer_func(struct hrtimer *timer)
 	return HRTIMER_NORESTART;
 }
 
+static ssize_t pwmvalue_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int count;
+
+	count = sprintf(buf, "%lu\n", pwmval);
+	pr_info("vibrator: pwmval: %lu\n", pwmval);
+
+	return count;
+}
+
+ssize_t pwmvalue_store(struct device *dev,
+		struct device_attribute *attr,
+		const char *buf, size_t size)
+{
+	if (sscanf(buf, "%lu", &pwmval) != 1)
+		pr_err("vibrator: error in storing pwm value\n");
+
+	pr_info("vibrator: pwmval: %lu\n", pwmval);
+
+	return size;
+}
+
+static DEVICE_ATTR(pwmvalue, S_IRUGO | S_IWUGO,
+		pwmvalue_show, pwmvalue_store);
+
+static int blade_create_vibrator_sysfs(void)
+{
+	int ret;
+	struct kobject *vibrator_kobj;
+	vibrator_kobj = kobject_create_and_add("vibrator", NULL);
+	if (unlikely(!vibrator_kobj))
+	return -ENOMEM;
+
+	ret = sysfs_create_file(vibrator_kobj,
+			&dev_attr_pwmvalue.attr);
+	if (unlikely(ret < 0)) {
+		pr_err("vibrator: sysfs_create_file failed: %d\n", ret);
+		return ret;
+	}
+
+	return 0;
+}
+
 static struct timed_output_dev pmic_vibrator = {
 	.name = "vibrator",
 	.get_time = vibrator_get_time,
@@ -153,6 +213,8 @@ void __init msm_init_pmic_vibrator(void)
 
 	hrtimer_init(&vibe_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	vibe_timer.function = vibrator_timer_func;
+
+	blade_create_vibrator_sysfs();
 
 	timed_output_dev_register(&pmic_vibrator);
 }
