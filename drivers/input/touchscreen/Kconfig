@@ -1040,6 +1040,9 @@ config TOUCHSCREEN_GT9XX_SHENQI
 
           If unsure, say N.
 
+config TOUCHSCREEN_SWEEP2SLEEP
+	bool "Enable kernel support for Sweep2Sleep"
+	default n
 
 source "drivers/input/touchscreen/gt9xx/Kconfig"
 source "drivers/input/touchscreen/gt9xx-shenqi/Kconfig"
