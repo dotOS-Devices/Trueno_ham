@@ -17,7 +17,7 @@
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM mdss
 #undef TRACE_INCLUDE_PATH
-#define TRACE_INCLUDE_PATH /home/suryavamsi/Android/ZukZ1ham/Kernel/android_kernel_cyanogen_msm8974-cm-14.1/drivers/video/msm/mdss/
+#define TRACE_INCLUDE_PATH ../../drivers/video/msm/mdss 
 #undef TRACE_INCLUDE_FILE
 #define TRACE_INCLUDE_FILE mdss_mdp_trace
 
