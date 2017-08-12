@@ -12,7 +12,7 @@ KERNEL_DEFCONFIG=lineageos_k9_defconfig
 DTBTOOL=$KERNEL_DIR/AnyKernel2/tools
 JOBS=3
 ANY_KERNEL2_DIR=$KERNEL_DIR/AnyKernel2
-FINAL_KERNEL_ZIP=StarCity-debug.zip
+FINAL_KERNEL_ZIP=StarCity_ham.zip
 DTBIMAGE="dtb"
 
 # The MAIN Part
