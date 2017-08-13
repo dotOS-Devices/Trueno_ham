@@ -473,40 +473,147 @@ void xhci_test_and_clear_bit(struct xhci_hcd *xhci, __le32 __iomem **port_array,
 	}
 }
 
-/* Updates Link Status for super Speed port */
-static void xhci_hub_report_link_state(u32 *status, u32 status_reg)
+static void xhci_single_step_completion(struct urb *urb)
 {
-	u32 pls = status_reg & PORT_PLS_MASK;
+	struct completion *done = urb->context;
 
-	/* resume state is a xHCI internal state.
-	 * Do not report it to usb core.
-	 */
-	if (pls == XDEV_RESUME)
-		return;
+	complete(done);
+}
 
-	/* When the CAS bit is set then warm reset
-	 * should be performed on port
-	 */
-	if (status_reg & PORT_CAS) {
-		/* The CAS bit can be set while the port is
-		 * in any link state.
-		 * Only roothubs have CAS bit, so we
-		 * pretend to be in compliance mode
-		 * unless we're already in compliance
-		 * or the inactive state.
-		 */
-		if (pls != USB_SS_PORT_LS_COMP_MOD &&
-		    pls != USB_SS_PORT_LS_SS_INACTIVE) {
-			pls = USB_SS_PORT_LS_COMP_MOD;
-		}
-		/* Return also connection bit -
-		 * hub state machine resets port
-		 * when this bit is set.
-		 */
-		pls |= USB_PORT_STAT_CONNECTION;
+/*
+ * Allocate a URB and initialize the various fields of it.
+ * This API is used by the single_step_set_feature test of
+ * EHSET where IN packet of the GetDescriptor request is
+ * sent 15secs after the SETUP packet.
+ * Return NULL if failed.
+ */
+static struct urb *xhci_request_single_step_set_feature_urb(
+		struct usb_device *udev,
+		void *dr,
+		void *buf,
+		struct completion *done)
+{
+	struct urb *urb;
+	struct usb_hcd *hcd = bus_to_hcd(udev->bus);
+	struct usb_host_endpoint *ep;
+
+	urb = usb_alloc_urb(0, GFP_KERNEL);
+	if (!urb)
+		return NULL;
+
+	urb->pipe = usb_rcvctrlpipe(udev, 0);
+	ep = udev->ep_in[usb_pipeendpoint(urb->pipe)];
+	if (!ep) {
+		usb_free_urb(urb);
+		return NULL;
 	}
-	/* update status field */
-	*status |= pls;
+
+	/*
+	 * Initialize the various URB fields as these are used by the HCD
+	 * driver to queue it and as well as when completion happens.
+	 */
+	urb->ep = ep;
+	urb->dev = udev;
+	urb->setup_packet = dr;
+	urb->transfer_buffer = buf;
+	urb->transfer_buffer_length = USB_DT_DEVICE_SIZE;
+	urb->complete = xhci_single_step_completion;
+	urb->status = -EINPROGRESS;
+	urb->actual_length = 0;
+	urb->transfer_flags = URB_DIR_IN;
+	usb_get_urb(urb);
+	atomic_inc(&urb->use_count);
+	atomic_inc(&urb->dev->urbnum);
+	usb_hcd_map_urb_for_dma(hcd, urb, GFP_KERNEL);
+	urb->context = done;
+	return urb;
+}
+
+/*
+ * This function implements the USB_PORT_FEAT_TEST handling of the
+ * SINGLE_STEP_SET_FEATURE test mode as defined in the Embedded
+ * High-Speed Electrical Test (EHSET) specification. This simply
+ * issues a GetDescriptor control transfer, with an inserted 15-second
+ * delay after the end of the SETUP stage and before the IN token of
+ * the DATA stage is set. The idea is that this gives the test operator
+ * enough time to configure the oscilloscope to perform a measurement
+ * of the response time between the DATA and ACK packets that follow.
+ */
+static int xhci_ehset_single_step_set_feature(struct usb_hcd *hcd, int port)
+{
+	int retval = -ENOMEM;
+	struct usb_ctrlrequest *dr;
+	struct urb *urb;
+	struct usb_device *udev;
+	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+	struct usb_device_descriptor *buf;
+	unsigned long flags;
+	DECLARE_COMPLETION_ONSTACK(done);
+
+	/* Obtain udev of the rhub's child port */
+	udev = hcd->self.root_hub->children[port];
+	if (!udev) {
+		xhci_err(xhci, "No device attached to the RootHub\n");
+		return -ENODEV;
+	}
+	buf = kmalloc(USB_DT_DEVICE_SIZE, GFP_KERNEL);
+	if (!buf)
+		return -ENOMEM;
+
+	dr = kmalloc(sizeof(struct usb_ctrlrequest), GFP_KERNEL);
+	if (!dr) {
+		kfree(buf);
+		return -ENOMEM;
+	}
+
+	/* Fill Setup packet for GetDescriptor */
+	dr->bRequestType = USB_DIR_IN;
+	dr->bRequest = USB_REQ_GET_DESCRIPTOR;
+	dr->wValue = cpu_to_le16(USB_DT_DEVICE << 8);
+	dr->wIndex = 0;
+	dr->wLength = cpu_to_le16(USB_DT_DEVICE_SIZE);
+	urb = xhci_request_single_step_set_feature_urb(udev, dr, buf, &done);
+	if (!urb)
+		goto cleanup;
+
+	/* Now complete just the SETUP stage */
+	spin_lock_irqsave(&xhci->lock, flags);
+	retval = xhci_submit_single_step_set_feature(hcd, urb, 1);
+	spin_unlock_irqrestore(&xhci->lock, flags);
+	if (retval)
+		goto out1;
+
+	if (!wait_for_completion_timeout(&done, msecs_to_jiffies(2000))) {
+		usb_kill_urb(urb);
+		retval = -ETIMEDOUT;
+		xhci_err(xhci, "%s SETUP stage timed out on ep0\n", __func__);
+		goto out1;
+	}
+
+	/* Sleep for 15 seconds; HC will send SOFs during this period */
+	msleep(15 * 1000);
+
+	/* Complete remaining DATA and status stages. Re-use same URB */
+	urb->status = -EINPROGRESS;
+	usb_get_urb(urb);
+	atomic_inc(&urb->use_count);
+	atomic_inc(&urb->dev->urbnum);
+
+	spin_lock_irqsave(&xhci->lock, flags);
+	retval = xhci_submit_single_step_set_feature(hcd, urb, 0);
+	spin_unlock_irqrestore(&xhci->lock, flags);
+	if (!retval && !wait_for_completion_timeout(&done,
+						msecs_to_jiffies(2000))) {
+		usb_kill_urb(urb);
+		retval = -ETIMEDOUT;
+		xhci_err(xhci, "%s IN stage timed out on ep0\n", __func__);
+	}
+out1:
+	usb_free_urb(urb);
+cleanup:
+	kfree(dr);
+	kfree(buf);
+	return retval;
 }
 
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
@@ -606,7 +713,6 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				xhci_dbg(xhci, "Resume USB2 port %d\n",
 					wIndex + 1);
 				bus_state->resume_done[wIndex] = 0;
-				clear_bit(wIndex, &bus_state->resuming_ports);
 				xhci_set_link_state(xhci, port_array, wIndex,
 							XDEV_U0);
 				xhci_dbg(xhci, "set port %d resume\n",
@@ -653,9 +759,13 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			else
 				status |= USB_PORT_STAT_POWER;
 		}
-		/* Update Port Link State for super speed ports*/
+		/* Port Link State */
 		if (hcd->speed == HCD_USB3) {
-			xhci_hub_report_link_state(&status, temp);
+			/* resume state is a xHCI internal state.
+			 * Do not report it to usb core.
+			 */
+			if ((temp & PORT_PLS_MASK) != XDEV_RESUME)
+				status |= (temp & PORT_PLS_MASK);
 		}
 		if (bus_state->port_c_suspend & (1 << wIndex))
 			status |= 1 << USB_PORT_FEAT_C_SUSPEND;
@@ -920,12 +1030,7 @@ int xhci_hub_status_data(struct usb_hcd *hcd, char *buf)
 	/* Initial status is no changes */
 	retval = (max_ports + 8) / 8;
 	memset(buf, 0, retval);
-
-	/*
-	 * Inform the usbcore about resume-in-progress by returning
-	 * a non-zero value even if there are no status changes.
-	 */
-	status = bus_state->resuming_ports;
+	status = 0;
 
 	mask = PORT_CSC | PORT_PEC | PORT_OCC | PORT_PLC | PORT_WRC;
 
@@ -965,11 +1070,15 @@ int xhci_bus_suspend(struct usb_hcd *hcd)
 	spin_lock_irqsave(&xhci->lock, flags);
 
 	if (hcd->self.root_hub->do_remote_wakeup) {
-		if (bus_state->resuming_ports) {
-			spin_unlock_irqrestore(&xhci->lock, flags);
-			xhci_dbg(xhci, "suspend failed because "
-						"a port is resuming\n");
-			return -EBUSY;
+		port_index = max_ports;
+		while (port_index--) {
+			if (bus_state->resume_done[port_index] != 0) {
+				spin_unlock_irqrestore(&xhci->lock, flags);
+				xhci_dbg(xhci, "suspend failed because "
+						"port %d is resuming\n",
+						port_index + 1);
+				return -EBUSY;
+			}
 		}
 	}
 
@@ -1146,3 +1255,4 @@ int xhci_bus_resume(struct usb_hcd *hcd)
 }
 
 #endif	/* CONFIG_PM */
+
