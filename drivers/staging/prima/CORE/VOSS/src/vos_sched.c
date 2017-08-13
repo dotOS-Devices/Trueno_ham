@@ -986,9 +986,9 @@ static int VosTXThread ( void * Arg )
 
   set_user_nice(current, -1);
   
-#ifdef WLAN_FEATURE_11AC_HIGH_TP
+/*#ifdef WLAN_FEATURE_11AC_HIGH_TP
   set_wake_up_idle(true);
-#endif
+#endif*/
 
   if (Arg == NULL)
   {
@@ -1180,10 +1180,10 @@ static int VosRXThread ( void * Arg )
 
   set_user_nice(current, -1);
   
-#ifdef WLAN_FEATURE_11AC_HIGH_TP
+/*#ifdef WLAN_FEATURE_11AC_HIGH_TP
   set_wake_up_idle(true);
 #endif
-
+*/
   if (Arg == NULL)
   {
      VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
@@ -2152,3 +2152,4 @@ void vos_dump_stack(uint8_t thread_id)
                              "%s: Invalid thread invoked",__func__);
    }
 }
+
