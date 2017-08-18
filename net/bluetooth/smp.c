@@ -282,37 +282,17 @@ static u8 check_enc_key_size(struct l2cap_conn *conn, __u8 max_key_size)
 	return 0;
 }
 
-static void smp_failure(struct l2cap_conn *conn, u8 reason, u8 send)
-{
-	struct hci_conn *hcon = conn->hcon;
-
-	if (send)
-		smp_send_cmd(conn, SMP_CMD_PAIRING_FAIL, sizeof(reason),
-								&reason);
-
-	clear_bit(HCI_CONN_ENCRYPT_PEND, &conn->hcon->flags);
-	mgmt_auth_failed(conn->hcon->hdev, conn->dst, hcon->type,
-			 hcon->dst_type, reason);
-
-	cancel_delayed_work_sync(&conn->security_timer);
-
-	if (test_and_clear_bit(HCI_CONN_LE_SMP_PEND, &conn->hcon->flags))
-		smp_chan_destroy(conn);
-}
-
-#define JUST_WORKS	0x00
-#define JUST_CFM	0x01
-#define REQ_PASSKEY	0x02
-#define CFM_PASSKEY	0x03
-#define REQ_OOB		0x04
-#define OVERLAP		0xFF
-
-static const u8 gen_method[5][5] = {
-	{ JUST_WORKS,  JUST_CFM,    REQ_PASSKEY, JUST_WORKS, REQ_PASSKEY },
-	{ JUST_WORKS,  JUST_CFM,    REQ_PASSKEY, JUST_WORKS, REQ_PASSKEY },
-	{ CFM_PASSKEY, CFM_PASSKEY, REQ_PASSKEY, JUST_WORKS, CFM_PASSKEY },
-	{ JUST_WORKS,  JUST_CFM,    JUST_WORKS,  JUST_WORKS, JUST_CFM    },
-	{ CFM_PASSKEY, CFM_PASSKEY, REQ_PASSKEY, JUST_WORKS, OVERLAP     },
+#define JUST_WORKS	SMP_JUST_WORKS
+#define REQ_PASSKEY	SMP_REQ_PASSKEY
+#define CFM_PASSKEY	SMP_CFM_PASSKEY
+#define JUST_CFM	SMP_JUST_CFM
+#define OVERLAP		SMP_OVERLAP
+static const u8	gen_method[5][5] = {
+	{JUST_WORKS,  JUST_CFM,    REQ_PASSKEY, JUST_WORKS, REQ_PASSKEY},
+	{JUST_WORKS,  JUST_CFM,    REQ_PASSKEY, JUST_WORKS, REQ_PASSKEY},
+	{CFM_PASSKEY, CFM_PASSKEY, REQ_PASSKEY, JUST_WORKS, CFM_PASSKEY},
+	{JUST_WORKS,  JUST_CFM,    JUST_WORKS,  JUST_WORKS, JUST_CFM},
+	{CFM_PASSKEY, CFM_PASSKEY, REQ_PASSKEY, JUST_WORKS, OVERLAP}
 };
 
 static int tk_request(struct l2cap_conn *conn, u8 remote_oob, u8 auth,
@@ -754,10 +734,9 @@ invalid_key:
 	return 0;
 }
 
-int smp_conn_security(struct hci_conn *hcon, __u8 sec_level)
+int smp_conn_security(struct l2cap_conn *conn, __u8 sec_level)
 {
-	struct l2cap_conn *conn = hcon->l2cap_data;
-	struct smp_chan *smp = conn->smp_chan;
+	struct hci_conn *hcon = conn->hcon;
 	__u8 authreq;
 
 	BT_DBG("conn %p hcon %p %d req: %d",
@@ -1090,3 +1069,4 @@ void smp_timeout(unsigned long arg)
 	mgmt_auth_failed(conn->hcon->hdev->id, conn->dst, SMP_UNSPECIFIED);
 	hci_conn_put(conn->hcon);
 }
+

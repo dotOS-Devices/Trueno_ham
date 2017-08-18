@@ -45,7 +45,7 @@
 
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
-#include <net/bluetooth/smp.h>
+#include <net/bluetooth/l2cap.h>
 
 struct hci_conn *hci_le_connect(struct hci_dev *hdev, __u16 pkt_type,
 				bdaddr_t *dst, __u8 sec_level, __u8 auth_type,
@@ -981,10 +981,6 @@ int hci_conn_security(struct hci_conn *conn, __u8 sec_level, __u8 auth_type)
 {
 	BT_DBG("conn %p %d %d", conn, sec_level, auth_type);
 
-	if (conn->type == LE_LINK)
-		return smp_conn_security(conn, sec_level);
-
-	/* For sdp we don't need the link key. */
 	if (sec_level == BT_SECURITY_SDP)
 		return 1;
 
@@ -1441,3 +1437,4 @@ int hci_set_auth_info(struct hci_dev *hdev, void __user *arg)
 
 	return copy_to_user(arg, &req, sizeof(req)) ? -EFAULT : 0;
 }
+

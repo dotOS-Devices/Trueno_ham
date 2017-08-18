@@ -638,8 +638,6 @@ static int hci_dev_do_close(struct hci_dev *hdev, u8 is_process)
 
 	BT_DBG("%s %p", hdev->name, hdev);
 
-	cancel_delayed_work(&hdev->power_off);
-
 	hci_req_cancel(hdev, ENODEV);
 	hci_req_lock(hdev);
 
@@ -2572,3 +2570,4 @@ static void hci_cmd_task(unsigned long arg)
 
 module_param(enable_smp, bool, 0644);
 MODULE_PARM_DESC(enable_smp, "Enable SMP support (LE only)");
+
