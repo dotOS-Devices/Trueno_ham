@@ -1529,6 +1529,7 @@ static void rcu_cleanup_dead_cpu(int cpu, struct rcu_state *rsp)
  */
 static void rcu_do_batch(struct rcu_state *rsp, struct rcu_data *rdp)
 {
+        int i;
 	unsigned long flags;
 	struct rcu_head *next, *list, **tail;
 	long bl, count, count_lazy;
