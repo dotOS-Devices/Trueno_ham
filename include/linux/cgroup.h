@@ -625,3 +625,4 @@ static inline int cgroup_attach_task_all(struct task_struct *from,
 #endif /* !CONFIG_CGROUPS */
 
 #endif /* _LINUX_CGROUP_H */
+
