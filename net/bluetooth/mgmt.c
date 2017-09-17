@@ -2851,7 +2851,7 @@ int mgmt_set_powered_failed(struct hci_dev *hdev, int err)
 	struct pending_cmd *cmd;
 	u8 status;
 
-	cmd = mgmt_pending_find(MGMT_OP_SET_POWERED, hdev);
+	cmd = mgmt_pending_find(MGMT_OP_SET_POWERED, hdev->id);
 	if (!cmd)
 		return -ENOENT;
 
@@ -2867,7 +2867,7 @@ int mgmt_set_powered_failed(struct hci_dev *hdev, int err)
 	return err;
 }
 
-int mgmt_discoverable(struct hci_dev *hdev, u8 discoverable)
+int mgmt_discoverable(u16 index, u8 discoverable)
 {
 	struct mgmt_mode ev;
 	struct cmd_lookup match = { discoverable, NULL };
