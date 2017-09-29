@@ -1410,6 +1410,7 @@ int __dwc3_gadget_ep_set_halt(struct dwc3_ep *dep, int value)
 			dev_dbg(dwc->dev, "failed to %s STALL on %s\n",
 					value ? "set" : "clear",
 					dep->name);
+                         }
 		else
 			dep->flags &= ~(DWC3_EP_STALL | DWC3_EP_WEDGE);
 	}
