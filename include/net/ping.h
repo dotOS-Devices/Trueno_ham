@@ -97,3 +97,4 @@ int  __init pingv6_init(void);
 void pingv6_exit(void);
 
 #endif /* _PING_H */
+
