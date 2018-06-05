@@ -223,6 +223,7 @@ static int boost_migration_notify(struct notifier_block *nb,
 
 static struct notifier_block boost_migration_nb = {
 	.notifier_call = boost_migration_notify,
+	.priority = INT_MAX-2,
 };
 
 static void do_input_boost(struct work_struct *work)
