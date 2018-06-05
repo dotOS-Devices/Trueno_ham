@@ -145,6 +145,8 @@ int usbnet_generic_cdc_bind(struct usbnet *dev, struct usb_interface *intf)
 				dev_dbg(&intf->dev, "extra CDC header\n");
 				goto bad_desc;
 			}
+			if (len < sizeof(struct usb_cdc_header_desc))
+				break;
 			info->header = (void *) buf;
 			if (info->header->bLength != sizeof *info->header) {
 				dev_dbg(&intf->dev, "CDC header len %u\n",
@@ -158,6 +160,8 @@ int usbnet_generic_cdc_bind(struct usbnet *dev, struct usb_interface *intf)
 			 */
 			if (rndis) {
 				struct usb_cdc_acm_descriptor *acm;
+				if (len < sizeof(struct usb_cdc_acm_descriptor))
+					break;
 
 				acm = (void *) buf;
 				if (acm->bmCapabilities) {
@@ -228,6 +232,8 @@ int usbnet_generic_cdc_bind(struct usbnet *dev, struct usb_interface *intf)
 				dev_dbg(&intf->dev, "extra CDC ether\n");
 				goto bad_desc;
 			}
+			if (len < sizeof(struct usb_cdc_ether_desc))
+				break;
 			info->ether = (void *) buf;
 			if (info->ether->bLength != sizeof *info->ether) {
 				dev_dbg(&intf->dev, "CDC ether len %u\n",
@@ -245,7 +251,6 @@ int usbnet_generic_cdc_bind(struct usbnet *dev, struct usb_interface *intf)
 				dev_dbg(&intf->dev, "extra MDLM descriptor\n");
 				goto bad_desc;
 			}
-
 			desc = (void *)buf;
 
 			if (desc->bLength != sizeof(*desc))
