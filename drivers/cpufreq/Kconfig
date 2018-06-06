@@ -67,11 +67,11 @@ config CPU_FREQ_DEFAULT_GOV_POWERSAVE
 	  the frequency statically to the lowest frequency supported by
 	  the CPU.
 
-config CPU_FREQ_DEFAULT_GOV_DARKNESS
-	bool "darkness"
-	select CPU_FREQ_GOV_DARKNESS
+config CPU_FREQ_DEFAULT_GOV_DANCEDANCE
+	bool "dancedance"
+	select CPU_FREQ_GOV_DANCEDANCE
 	help
-	  Use the CPUFreq governor 'darkness' as default.
+	  Use the CPUFreq governor 'dancedance' as default.
 
 
 config CPU_FREQ_DEFAULT_GOV_USERSPACE
@@ -203,11 +203,11 @@ config CPU_FREQ_GOV_INTERACTIVE
 
 	  If in doubt, say N.
 
-config CPU_FREQ_GOV_DARKNESS
-	tristate "'darkness' cpufreq policy governor"
+config CPU_FREQ_GOV_DANCEDANCE
+	tristate "'dancedance' cpufreq policy governor"
 	depends on CPU_FREQ
 	help
-	  'darkness' - This driver is a rather simple implementation of a timer
+	  'dancedance' - This driver is a rather simple implementation of a timer
 	  based governor.
 
 	  If in doubt, say N.
