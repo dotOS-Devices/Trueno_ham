@@ -2434,6 +2434,13 @@ config ALUCARD_HOTPLUG
 	help
 Generic Alucard-hotplug cpu hotplug driver for ARM SOCs
 
+config AUTOSMP
+	bool "Multi-core automatic hotplug support"
+	depends on SMP && HOTPLUG_CPU
+	help
+	  Automatically hotplugs the multiple cpu cores on and off
+	  based on cpu load and suspend state
+
 
 config MSM_MEMORY_DUMP
 	bool "MSM Memory Dump Support"

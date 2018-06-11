@@ -426,4 +426,4 @@ obj-$(CONFIG_ARCH_RANDOM) += early_random.o
 obj-$(CONFIG_PERFMAP) += perfmap.o
 
 obj-$(CONFIG_ALUCARD_HOTPLUG)              += alucard_hotplug.o
-
+obj-$(CONFIG_AUTOSMP) += autosmp.o
