@@ -8,7 +8,7 @@ set -e
 
 KERNEL_DIR=$PWD
 KERNEL_TOOLCHAIN=$KERNEL_DIR/toolchain-4.9/bin/arm-eabi-
-KERNEL_DEFCONFIG=lineageos_k9_defconfig
+KERNEL_DEFCONFIG=StarCity_defconfig
 DTBTOOL=$KERNEL_DIR/AnyKernel2/tools
 JOBS=3
 ANY_KERNEL2_DIR=$KERNEL_DIR/AnyKernel2
