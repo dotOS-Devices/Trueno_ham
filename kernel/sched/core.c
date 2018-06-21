@@ -1320,28 +1320,18 @@ EXPORT_SYMBOL_GPL(kick_process);
  */
 static int select_fallback_rq(int cpu, struct task_struct *p)
 {
-	int nid = cpu_to_node(cpu);
-	const struct cpumask *nodemask = NULL;
+	const struct cpumask *nodemask = cpumask_of_node(cpu_to_node(cpu));
 	enum { cpuset, possible, fail } state = cpuset;
 	int dest_cpu;
 
-	/*
-	 * If the node that the cpu is on has been offlined, cpu_to_node()
-	 * will return -1. There is no cpu on the node, and we should
-	 * select the cpu on the other node.
-	 */
-	if (nid != -1) {
-		nodemask = cpumask_of_node(nid);
-
-		/* Look for allowed, online CPU in same node. */
-		for_each_cpu(dest_cpu, nodemask) {
-			if (!cpu_online(dest_cpu))
-				continue;
-			if (!cpu_active(dest_cpu))
-				continue;
-			if (cpumask_test_cpu(dest_cpu, tsk_cpus_allowed(p)))
-				return dest_cpu;
-		}
+	/* Look for allowed, online CPU in same node. */
+	for_each_cpu(dest_cpu, nodemask) {
+		if (!cpu_online(dest_cpu))
+			continue;
+		if (!cpu_active(dest_cpu))
+			continue;
+		if (cpumask_test_cpu(dest_cpu, tsk_cpus_allowed(p)))
+			return dest_cpu;
 	}
 
 	for (;;) {
@@ -1734,6 +1724,7 @@ static void try_to_wake_up_local(struct task_struct *p)
 			__func__, task_pid_nr(p), p->comm, rq,
 			this_rq(), p, current);
 		return;
+	}
 
 	lockdep_assert_held(&rq->lock);
 

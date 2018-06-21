@@ -26,7 +26,6 @@
 #include "mdss_panel.h"
 #include "mdss_dsi.h"
 #include "mdss_debug.h"
-#include "mdss_livedisplay.h"
 
 static int mdss_dsi_regulator_init(struct platform_device *pdev)
 {
@@ -685,7 +684,7 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 	}
 #endif
 
-	pr_debug("%s+: ctrl=%pK ndx=%d\n",
+	pr_debug("%s+: ctrl=%p ndx=%d\n",
 				__func__, ctrl_pdata, ctrl_pdata->ndx);
 
 	pinfo = &pdata->panel_info;
@@ -783,9 +782,6 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
 				mdss_dsi_set_tear_on(ctrl_pdata);
 		}
 	}
-
-	mdss_livedisplay_update(pdata->panel_info.livedisplay,
-			MODE_UPDATE_ALL);
 
 	pr_debug("%s-:\n", __func__);
 
@@ -1386,7 +1382,7 @@ int mdss_dsi_retrieve_ctrl_resources(struct platform_device *pdev, int mode,
 		return rc;
 	}
 
-	pr_info("%s: ctrl_base=%pK ctrl_size=%x phy_base=%pK phy_size=%x\n",
+	pr_info("%s: ctrl_base=%p ctrl_size=%x phy_base=%p phy_size=%x\n",
 		__func__, ctrl->ctrl_base, ctrl->reg_size, ctrl->phy_io.base,
 		ctrl->phy_io.len);
 
