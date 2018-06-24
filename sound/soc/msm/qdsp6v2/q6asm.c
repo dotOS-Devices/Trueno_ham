@@ -955,7 +955,7 @@ int q6asm_audio_client_buf_alloc(unsigned int dir,
 	int cnt = 0;
 	int rc = 0;
 	struct audio_buffer *buf;
-	size_t len;
+	int len;
 
 	if (!(ac) || ((dir != IN) && (dir != OUT)))
 		return -EINVAL;
@@ -989,7 +989,7 @@ int q6asm_audio_client_buf_alloc(unsigned int dir,
 					&buf[cnt].client, &buf[cnt].handle,
 					      bufsz,
 					      (ion_phys_addr_t *)&buf[cnt].phys,
-					      &len,
+					      (size_t *)&len,
 					      &buf[cnt].data);
 					if (rc) {
 						pr_err("%s: ION Get Physical for AUDIO failed, rc = %d\n",
@@ -1033,7 +1033,7 @@ int q6asm_audio_client_buf_alloc_contiguous(unsigned int dir,
 	int cnt = 0;
 	int rc = 0;
 	struct audio_buffer *buf;
-	size_t len;
+	int len;
 	int bytes_to_alloc;
 
 	if (!(ac) || ((dir != IN) && (dir != OUT)))
@@ -1074,7 +1074,7 @@ int q6asm_audio_client_buf_alloc_contiguous(unsigned int dir,
 
 	rc = msm_audio_ion_alloc("audio_client", &buf[0].client, &buf[0].handle,
 		bytes_to_alloc,
-		(ion_phys_addr_t *)&buf[0].phys, &len,
+		(ion_phys_addr_t *)&buf[0].phys, (size_t *)&len,
 		&buf[0].data);
 	if (rc) {
 		pr_err("%s: Audio ION alloc is failed, rc = %d\n",
@@ -1806,7 +1806,7 @@ static int __q6asm_open_read(struct audio_client *ac,
 	open.mode_flags = 0x0;
 
 	if (ac->perf_mode == LOW_LATENCY_PCM_MODE) {
-		open.mode_flags |= ASM_LOW_LATENCY_TX_STREAM_SESSION <<
+		open.mode_flags |= ASM_LOW_LATENCY_STREAM_SESSION <<
 				ASM_SHIFT_STREAM_PERF_MODE_FLAG_IN_OPEN_READ;
 	} else {
 		open.mode_flags |= ASM_LEGACY_STREAM_SESSION <<
